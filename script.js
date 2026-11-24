@@ -1,67 +1,45 @@
-// Lightbox Controller
+// Seamless Certificate Expander (Clean image zoom, no popup bar)
 var openLightbox, closeLightbox;
 (function () {
-  var lb = document.getElementById("lightbox"),
-    img = document.getElementById("lb-img"),
-    stage = document.getElementById("lb-stage"),
-    title = document.getElementById("lb-title"),
-    zoom = document.getElementById("lb-zoom"),
-    closeBtn = document.getElementById("lb-close"),
+  var overlay = document.getElementById("cert-expand-overlay"),
+    img = document.getElementById("cert-expand-img"),
+    stage = document.getElementById("cert-expand-stage"),
+    closeBtn = document.getElementById("cert-expand-close"),
     last = null;
 
-  function setFull(on) {
-    if (!lb || !zoom || !stage) return;
-    lb.classList.toggle("is-full", on);
-    zoom.setAttribute("aria-pressed", on);
-    zoom.textContent = on ? "Fit to screen" : "View full size";
-    stage.scrollTop = 0;
-    stage.scrollLeft = 0;
-  }
-
   openLightbox = function (fullSrc, certTitle, altText, triggerEl) {
-    if (!lb || !img || !title) return;
+    if (!overlay || !img) return;
     last = triggerEl || null;
     img.src = fullSrc;
-    img.alt = altText || certTitle;
-    title.textContent = certTitle;
-    setFull(false);
-    lb.hidden = false;
+    img.alt = altText || certTitle || "Certificate Preview";
+    overlay.hidden = false;
     document.body.style.overflow = "hidden";
     if (closeBtn) closeBtn.focus();
   };
 
   closeLightbox = function () {
-    if (!lb || !img) return;
-    lb.hidden = true;
+    if (!overlay || !img) return;
+    overlay.hidden = true;
     document.body.style.overflow = "";
     img.removeAttribute("src");
     if (last && typeof last.focus === "function") last.focus();
   };
 
-  if (zoom) {
-    zoom.addEventListener("click", function () {
-      setFull(!lb.classList.contains("is-full"));
-    });
-  }
   if (closeBtn) {
     closeBtn.addEventListener("click", closeLightbox);
   }
-  if (lb) {
-    lb.addEventListener("click", function (e) {
-      if (e.target === lb || e.target === stage) closeLightbox();
+  if (overlay) {
+    overlay.addEventListener("click", function (e) {
+      if (e.target === overlay || e.target === stage || e.target === img) {
+        closeLightbox();
+      }
     });
   }
   document.addEventListener("keydown", function (e) {
-    if (lb && !lb.hidden) {
+    if (overlay && !overlay.hidden) {
       if (e.key === "Escape") {
         e.preventDefault();
         closeLightbox();
-      }
-      if (e.key === "Tab") {
-        var f = [zoom, closeBtn].filter(Boolean);
-        var i = f.indexOf(document.activeElement);
-        e.preventDefault();
-        f[(i + (e.shiftKey ? -1 : 1) + f.length) % f.length].focus();
       }
     }
   });
@@ -272,7 +250,7 @@ document
 
   // Clicking outside any certificate folder closes open folders
   document.addEventListener("click", function (e) {
-    if (!e.target.closest(".cert-folder") && !e.target.closest("#lightbox")) {
+    if (!e.target.closest(".cert-folder") && !e.target.closest("#cert-expand-overlay")) {
       closeAllFolders();
     }
   });
