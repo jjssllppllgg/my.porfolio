@@ -246,6 +246,15 @@ document
         }
       });
     }
+
+    // Automatically close folder as soon as mouse leaves
+    folder.addEventListener("mouseleave", function () {
+      if (folder.classList.contains("is-open")) {
+        folder.classList.remove("is-open");
+        if (wrap) wrap.setAttribute("aria-expanded", "false");
+        if (hint) hint.textContent = "Click to open";
+      }
+    });
   });
 
   // Clicking outside any certificate folder closes open folders
